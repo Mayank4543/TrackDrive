@@ -186,6 +186,7 @@
         <p class="subtitle">
             InfoWorx — Inbound Webhook: <strong>check_fe_agents</strong><br />
             Ping then Post flow. trackdrive_number and traffic_source_id are fixed by your account setup.
+            No fields below are required by TrackDrive itself — fill in whatever data you have.
         </p>
 
         <form id="leadForm">
@@ -194,19 +195,19 @@
                 <div class="grid">
 
                     <div class="field">
-                        <label for="first_name">First Name <span class="req">*</span></label>
-                        <input id="first_name" name="first_name" placeholder="Jane" required />
+                        <label for="first_name">First Name</label>
+                        <input id="first_name" name="first_name" placeholder="Jane" />
                     </div>
 
                     <div class="field">
-                        <label for="last_name">Last Name <span class="req">*</span></label>
-                        <input id="last_name" name="last_name" placeholder="Doe" required />
+                        <label for="last_name">Last Name</label>
+                        <input id="last_name" name="last_name" placeholder="Doe" />
                     </div>
 
                     <div class="field">
-                        <label for="caller_id">Caller Phone Number <span class="req">*</span></label>
-                        <input id="caller_id" name="caller_id" placeholder="7194451111" required />
-                        <span class="small">10–11 digits. This is the lead's telephone number.</span>
+                        <label for="caller_id">Caller Phone Number</label>
+                        <input id="caller_id" name="caller_id" placeholder="7194451111" />
+                        <span class="small">10–11 digits, if provided. This is the lead's telephone number.</span>
                     </div>
 
                     <div class="field">
@@ -215,13 +216,13 @@
                     </div>
 
                     <div class="field">
-                        <label for="email">Email Address <span class="req">*</span></label>
-                        <input id="email" name="email" type="email" placeholder="jane@example.com" required />
+                        <label for="email">Email Address</label>
+                        <input id="email" name="email" type="email" placeholder="jane@example.com" />
                     </div>
 
                     <div class="field">
-                        <label for="zip">Zip Code <span class="req">*</span></label>
-                        <input id="zip" name="zip" placeholder="80301" required />
+                        <label for="zip">Zip Code</label>
+                        <input id="zip" name="zip" placeholder="80301" />
                     </div>
 
                     <div class="field">
@@ -230,8 +231,8 @@
                     </div>
 
                     <div class="field">
-                        <label for="state">State <span class="req">*</span></label>
-                        <select id="state" name="state" required>
+                        <label for="state">State</label>
+                        <select id="state" name="state">
                             <option value="">— Select State —</option>
                             <option>AL</option>
                             <option>AK</option>
@@ -343,10 +344,9 @@
                     </div>
 
                     <div class="field full">
-                        <label for="trusted_form_cert_url">Trusted Form Certificate URL <span
-                                class="req">*</span></label>
+                        <label for="trusted_form_cert_url">Trusted Form Certificate URL</label>
                         <input id="trusted_form_cert_url" name="trusted_form_cert_url" type="url"
-                            placeholder="https://cert.trustedform.com/..." required />
+                            placeholder="https://cert.trustedform.com/..." />
                     </div>
 
                     <div class="field full">
@@ -410,13 +410,16 @@
             const get = (name) => (data.get(name) || "").toString().trim();
 
             // ── Client-side validation ─────────────────────────────────────
-            if (!get("first_name")) { setStatus("First Name is required.", "error"); return; }
-            if (!get("last_name")) { setStatus("Last Name is required.", "error"); return; }
-            if (!validPhone(get("caller_id"))) { setStatus("Caller Phone Number must be 10–11 digits (numbers only).", "error"); return; }
-            if (!get("email")) { setStatus("Email Address is required.", "error"); return; }
-            if (!get("zip")) { setStatus("Zip Code is required.", "error"); return; }
-            if (!get("state")) { setStatus("State is required.", "error"); return; }
-            if (!get("trusted_form_cert_url")) { setStatus("Trusted Form Certificate URL is required.", "error"); return; }
+            // Nothing is required by TrackDrive itself — only validate format
+            // for fields the user did choose to fill in.
+            if (get("caller_id") && !validPhone(get("caller_id"))) {
+                setStatus("Caller Phone Number must be 10–11 digits (numbers only).", "error");
+                return;
+            }
+            if (get("alternate_phone") && !validPhone(get("alternate_phone"))) {
+                setStatus("Alternate Phone must be 10–11 digits (numbers only).", "error");
+                return;
+            }
 
             // ── Split DOB ────────────────────────────────────────────────
             let dob_mm = "", dob_dd = "", dob_yyyy = "";

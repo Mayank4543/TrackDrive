@@ -166,20 +166,29 @@ export default async function handler(req, res) {
   try {
     const data = typeof req.body === "string" ? JSON.parse(req.body) : req.body;
 
-    const callerId = digitsOnly(data?.caller_id);
-    const state = (data?.state || "").toUpperCase();
+    const callerId = data?.caller_id ? digitsOnly(data.caller_id) : "";
+    const alternatePhone = data?.alternate_phone
+      ? digitsOnly(data.alternate_phone)
+      : "";
+    const state = data?.state ? data.state.toUpperCase() : "";
 
     // ── Validation ────────────────────────────────────────────────────
+    // Nothing is required by TrackDrive itself — only trackdrive_number,
+    // traffic_source_id (both fixed below), and ping_id (added after the
+    // ping response) are actually required. Everything else is optional;
+    // we only validate FORMAT for fields the caller chose to include.
     const errors = {};
-    if (!data?.first_name) errors.first_name = "required";
-    if (!data?.last_name) errors.last_name = "required";
-    if (!(callerId.length === 10 || callerId.length === 11))
-      errors.caller_id = "required, must be 10–11 digits";
-    if (!data?.email) errors.email = "required";
-    if (!data?.zip) errors.zip = "required";
-    if (!state || !ALLOWED_STATES.has(state))
-      errors.state = "required; must be a valid 2-letter US state";
-    if (!data?.trusted_form_cert_url) errors.trusted_form_cert_url = "required";
+    if (callerId && !(callerId.length === 10 || callerId.length === 11))
+      errors.caller_id = "must be 10–11 digits if provided";
+    if (
+      alternatePhone &&
+      !(alternatePhone.length === 10 || alternatePhone.length === 11)
+    )
+      errors.alternate_phone = "must be 10–11 digits if provided";
+    if (state && !ALLOWED_STATES.has(state))
+      errors.state = "must be a valid 2-letter US state if provided";
+    if (data?.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(data.email))
+      errors.email = "must be a valid email if provided";
 
     if (Object.keys(errors).length) {
       return res.status(400).json({ status: 4, errors: [errors] });
@@ -199,9 +208,7 @@ export default async function handler(req, res) {
       city: data.city || "",
       state,
       address: data.address || "",
-      alternate_phone: data.alternate_phone
-        ? digitsOnly(data.alternate_phone)
-        : "",
+      alternate_phone: alternatePhone,
       dob_mm: data.dob_mm || "",
       dob_dd: data.dob_dd || "",
       dob_yyyy: data.dob_yyyy || "",
