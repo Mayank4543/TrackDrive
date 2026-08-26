@@ -117,29 +117,59 @@ async function sendDebugEmail({
     return { sent: false, reason: "EMAIL_USER or EMAIL_PASS environment variable is missing" };
   }
 
+  // Determine acceptance status
+  const postSuccess =
+    postResult?.success === true ||
+    postResult?.status === "accepted" ||
+    Boolean(postResult?.forwarding_number);
+  const pingSuccess = pingResult?.success === true && Boolean(pingResult?.buyers?.length);
+
+  let leadStatusBanner = "";
+  let statusTag = "";
+
+  if (postSuccess) {
+    statusTag = "[LEAD ACCEPTED]";
+    leadStatusBanner = `✅ LEAD ACCEPTED BY TRACKDRIVE
+Forwarding Number : ${postResult?.forwarding_number || "Accepted"}
+SIP Address       : ${postResult?.forwarding_number_sip_address || "—"}`;
+  } else if (pingSuccess) {
+    statusTag = "[PING ACCEPTED - POST PENDING]";
+    leadStatusBanner = `⚠️ PING ACCEPTED (BUYER FOUND), BUT POST REJECTED
+Post Error / Response: ${JSON.stringify(postResult?.errors || postResult || "Failed")}`;
+  } else {
+    statusTag = "[LEAD REJECTED - NO BUYER]";
+    leadStatusBanner = `❌ LEAD REJECTED BY TRACKDRIVE
+Reason / Ping Status : ${pingResult?.status || pingResult?.errors?.[0] || "No buyers matched filter criteria"}`;
+  }
+
   const or = (v) => (v === undefined || v === null || v === "" ? "—" : v);
 
   const message = `
+==================================================
+TRACKDRIVE LEAD STATUS: ${statusTag}
+==================================================
+${leadStatusBanner}
+
 New TrackDrive Lead — InfoWorx check_fe_agents
-trackdrive_number: ${TRACKDRIVE_NUMBER}
-traffic_source_id: ${TRAFFIC_SOURCE_ID}
+trackdrive_number : ${TRACKDRIVE_NUMBER}
+traffic_source_id : ${TRAFFIC_SOURCE_ID}
 
 ━━━ LEAD DATA SUBMITTED ━━━━━━━━━━━━━━━━━━━━━━━━━━━
 ${Object.entries(lead || {})
   .map(([k, v]) => `${k.padEnd(28)}: ${or(v)}`)
   .join("\n")}
 
-━━━ PING REQUEST ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+━━━ PING REQUEST LOG ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 URL: ${pingUrl}
 Response:
 ${pingResult ? JSON.stringify(pingResult, null, 2) : "—"}
 
-━━━ POST REQUEST ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-URL: ${postUrl || "— (not sent — no buyer available on ping)"}
+━━━ POST REQUEST LOG ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+URL: ${postUrl || "—"}
 Response:
 ${postResult ? JSON.stringify(postResult, null, 2) : "—"}
 
-${error ? `━━━ ERROR ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n${error}\n` : ""}
+${error ? `━━━ ERROR LOG ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n${error}\n` : ""}
 `.trim();
 
   try {
@@ -147,13 +177,6 @@ ${error ? `━━━ ERROR ━━━━━━━━━━━━━━━━━�
       service: "gmail",
       auth: { user: process.env.EMAIL_USER, pass: process.env.EMAIL_PASS },
     });
-
-    const isAccepted = Boolean(pingResult?.success && postResult?.forwarding_number);
-    const statusTag = isAccepted
-      ? "[ACCEPTED]"
-      : pingResult?.success
-      ? "[NO BUYER AVAILABLE]"
-      : "[REJECTED/FAILED]";
 
     const info = await transporter.sendMail({
       from: process.env.EMAIL_USER,
@@ -272,55 +295,49 @@ export default async function handler(req, res) {
       pingRes = await fetch(pingFullUrl, { method: "GET" });
       pingResult = await pingRes.json();
     } catch (networkErr) {
-      await sendDebugEmail({
-        lead,
-        pingUrl: pingFullUrl,
-        pingResult: null,
-        error: `Ping network error: ${networkErr.message}`,
-      });
-      return res
-        .status(502)
-        .json({
-          error: "Could not reach TrackDrive ping endpoint.",
-          detail: networkErr.message,
-        });
+      console.error("Ping network error:", networkErr.message);
+      pingResult = { error: networkErr.message };
     }
 
     const buyers = pingResult?.buyers || [];
-    const pingId = buyers[0]?.ping_id || pingResult?.try_all_buyers_ping_id || "";
-    const pingAccepted = pingResult?.success === true && Boolean(pingId);
+    // Extract ping_id or fallback to try_all_buyers or dummy fallback for direct post
+    const pingId =
+      buyers[0]?.ping_id ||
+      pingResult?.try_all_buyers_ping_id ||
+      pingResult?.try_all_buyers?.ping_id ||
+      "";
 
-    let postRes = null, postResult = null;
+    // ── 2) POST ───────────────────────────────────────────────────────
+    // Always perform POST so the lead registers in TrackDrive & triggers email notification
+    const postPayload = pingId ? { ...lead, ping_id: pingId } : { ...lead };
+    const postParams = toParams(postPayload);
 
-    // ── 2) POST (Only if Ping returned a valid ping_id) ─────────────────
-    if (pingId) {
-      const postPayload = { ...lead, ping_id: pingId };
-      const postParams = toParams(postPayload);
-
-      try {
-        postRes = await fetch(POST_URL, {
-          method: "POST",
-          headers: { "Content-Type": "application/x-www-form-urlencoded" },
-          body: postParams.toString(),
-        });
-        postResult = await postRes.json();
-      } catch (networkErr) {
-        console.error("Post error:", networkErr);
-        postResult = { error: networkErr.message };
-      }
+    let postRes, postResult;
+    try {
+      postRes = await fetch(POST_URL, {
+        method: "POST",
+        headers: { "Content-Type": "application/x-www-form-urlencoded" },
+        body: postParams.toString(),
+      });
+      postResult = await postRes.json();
+    } catch (networkErr) {
+      console.error("Post network error:", networkErr.message);
+      postResult = { error: networkErr.message };
     }
+
+    const isPostSuccess = postResult?.success === true || postResult?.status === "accepted";
 
     const emailStatus = await sendDebugEmail({
       lead,
       pingUrl: pingFullUrl,
       pingResult,
-      postUrl: pingId ? POST_URL : "",
+      postUrl: POST_URL,
       postResult,
     });
 
     return res.status(200).json({
       success: true,
-      pingAccepted,
+      leadAccepted: isPostSuccess || pingResult?.success === true,
       forwardingNumber: postResult?.forwarding_number || "",
       forwardingNumberSip: postResult?.forwarding_number_sip_address || "",
       pingResponse: pingResult,

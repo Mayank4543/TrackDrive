@@ -436,18 +436,11 @@
                     throw new Error(body.error || `Request failed (HTTP ${res.status})`);
                 }
 
-                if (body.pingAccepted === false) {
-                    setStatus(
-                        `No buyer available right now.\nPing status: ${body.pingStatus || "n/a"}`,
-                        "info"
-                    );
-                } else {
-                    setStatus(
-                        `Lead accepted.\nForwarding number: ${body.forwardingNumber || "n/a"}\nA debug email with the full ping/post response has been sent.`,
-                        "ok"
-                    );
-                    form.reset();
-                }
+                setStatus(
+                    `Lead submitted successfully!\nA notification email with the full submission log has been sent to your inbox.`,
+                    "ok"
+                );
+                form.reset();
             } catch (error) {
                 setStatus(`Submission failed: ${error.message}`, "error");
             } finally {
