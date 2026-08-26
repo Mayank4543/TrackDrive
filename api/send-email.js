@@ -204,6 +204,16 @@ export default async function handler(req, res) {
     // IP always comes from request headers — never trust user input for this
     const ipAddress = getRealIp(req);
 
+    // Handle DOB: calculate `dob` (YYYY-MM-DD) if dob_yyyy, dob_mm, dob_dd are available
+    let dob = data.dob || "";
+    const dob_yyyy = data.dob_yyyy || "";
+    const dob_mm = data.dob_mm || "";
+    const dob_dd = data.dob_dd || "";
+
+    if (!dob && dob_yyyy && dob_mm && dob_dd) {
+      dob = `${dob_yyyy}-${dob_mm.padStart(2, "0")}-${dob_dd.padStart(2, "0")}`;
+    }
+
     lead = {
       trackdrive_number: TRACKDRIVE_NUMBER,
       traffic_source_id: TRAFFIC_SOURCE_ID,
@@ -216,9 +226,10 @@ export default async function handler(req, res) {
       state,
       address: data.address || "",
       alternate_phone: alternatePhone,
-      dob_mm: data.dob_mm || "",
-      dob_dd: data.dob_dd || "",
-      dob_yyyy: data.dob_yyyy || "",
+      dob,
+      dob_mm,
+      dob_dd,
+      dob_yyyy,
       gender: data.gender || "",
       marital_status: data.marital_status || "",
       employment_status: data.employment_status || "",
