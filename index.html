@@ -229,11 +229,6 @@
         const form = document.getElementById("leadForm");
         const statusEl = document.getElementById("status");
         const submitBtn = document.getElementById("submitBtn");
-        const sourceUrlInput = document.getElementById("source_url");
-
-        if (sourceUrlInput && !sourceUrlInput.value) {
-            sourceUrlInput.value = window.location.href;
-        }
 
         function setStatus(message, type) {
             statusEl.textContent = message;
