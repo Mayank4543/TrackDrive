@@ -1,0 +1,497 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>TrackDrive Lead Form — InfoWorx (check_fe_agents)</title>
+    <style>
+        :root {
+            --bg: #0f172a;
+            --card: #111827;
+            --text: #e5e7eb;
+            --muted: #9ca3af;
+            --accent: #22c55e;
+            --danger: #ef4444;
+            --border: #374151;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background: linear-gradient(160deg, #020617, #0f172a);
+            color: var(--text);
+            min-height: 100vh;
+            padding: 24px;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 24px;
+        }
+
+        h1 {
+            margin-top: 0;
+            font-size: 22px;
+        }
+
+        .subtitle {
+            color: var(--muted);
+            font-size: 13px;
+            margin-bottom: 20px;
+        }
+
+        fieldset {
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            margin-bottom: 16px;
+            padding: 14px;
+        }
+
+        legend {
+            color: #d1d5db;
+            font-size: 13px;
+            padding: 0 6px;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 12px;
+        }
+
+        .field {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .field.full {
+            grid-column: 1 / -1;
+        }
+
+        label {
+            font-size: 13px;
+            color: #d1d5db;
+        }
+
+        label .req {
+            color: var(--danger);
+        }
+
+        input,
+        select,
+        textarea,
+        button {
+            width: 100%;
+            border-radius: 8px;
+            border: 1px solid var(--border);
+            background: #0b1220;
+            color: var(--text);
+            padding: 10px;
+            font-size: 14px;
+        }
+
+        select option {
+            background: #0b1220;
+        }
+
+        textarea {
+            min-height: 60px;
+            resize: vertical;
+        }
+
+        .checkbox-row {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex-direction: row;
+        }
+
+        .checkbox-row input {
+            width: auto;
+        }
+
+        button {
+            cursor: pointer;
+            background: var(--accent);
+            color: #052e16;
+            border: 0;
+            font-weight: 700;
+            margin-top: 8px;
+            padding: 12px;
+            font-size: 15px;
+        }
+
+        button:disabled {
+            opacity: 0.6;
+            cursor: wait;
+        }
+
+        .status {
+            margin-top: 12px;
+            padding: 10px;
+            border-radius: 8px;
+            display: none;
+            white-space: pre-wrap;
+            line-height: 1.4;
+            font-size: 13px;
+        }
+
+        .status.ok {
+            display: block;
+            background: #052e16;
+            color: #bbf7d0;
+            border: 1px solid #15803d;
+        }
+
+        .status.error {
+            display: block;
+            background: #450a0a;
+            color: #fecaca;
+            border: 1px solid #b91c1c;
+        }
+
+        .status.info {
+            display: block;
+            background: #1e293b;
+            color: #cbd5e1;
+            border: 1px solid #334155;
+        }
+
+        .small {
+            font-size: 12px;
+            color: var(--muted);
+        }
+
+        @media (max-width: 760px) {
+            .grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <h1>TrackDrive Lead Form</h1>
+        <p class="subtitle">
+            InfoWorx — Inbound Webhook: <strong>check_fe_agents</strong><br />
+            Ping then Post flow. trackdrive_number and traffic_source_id are fixed by your account setup.
+        </p>
+
+        <form id="leadForm">
+            <fieldset>
+                <legend>Lead Details</legend>
+                <div class="grid">
+
+                    <div class="field">
+                        <label for="first_name">First Name <span class="req">*</span></label>
+                        <input id="first_name" name="first_name" placeholder="Jane" required />
+                    </div>
+
+                    <div class="field">
+                        <label for="last_name">Last Name <span class="req">*</span></label>
+                        <input id="last_name" name="last_name" placeholder="Doe" required />
+                    </div>
+
+                    <div class="field">
+                        <label for="caller_id">Caller Phone Number <span class="req">*</span></label>
+                        <input id="caller_id" name="caller_id" placeholder="7194451111" required />
+                        <span class="small">10–11 digits. This is the lead's telephone number.</span>
+                    </div>
+
+                    <div class="field">
+                        <label for="alternate_phone">Alternate Phone</label>
+                        <input id="alternate_phone" name="alternate_phone" placeholder="7194451112" />
+                    </div>
+
+                    <div class="field">
+                        <label for="email">Email Address <span class="req">*</span></label>
+                        <input id="email" name="email" type="email" placeholder="jane@example.com" required />
+                    </div>
+
+                    <div class="field">
+                        <label for="zip">Zip Code <span class="req">*</span></label>
+                        <input id="zip" name="zip" placeholder="80301" required />
+                    </div>
+
+                    <div class="field">
+                        <label for="city">City</label>
+                        <input id="city" name="city" placeholder="Boulder" />
+                    </div>
+
+                    <div class="field">
+                        <label for="state">State <span class="req">*</span></label>
+                        <select id="state" name="state" required>
+                            <option value="">— Select State —</option>
+                            <option>AL</option>
+                            <option>AK</option>
+                            <option>AZ</option>
+                            <option>AR</option>
+                            <option>CA</option>
+                            <option>CO</option>
+                            <option>CT</option>
+                            <option>DC</option>
+                            <option>DE</option>
+                            <option>FL</option>
+                            <option>GA</option>
+                            <option>HI</option>
+                            <option>ID</option>
+                            <option>IL</option>
+                            <option>IN</option>
+                            <option>IA</option>
+                            <option>KS</option>
+                            <option>KY</option>
+                            <option>LA</option>
+                            <option>ME</option>
+                            <option>MD</option>
+                            <option>MA</option>
+                            <option>MI</option>
+                            <option>MN</option>
+                            <option>MS</option>
+                            <option>MO</option>
+                            <option>MT</option>
+                            <option>NE</option>
+                            <option>NV</option>
+                            <option>NH</option>
+                            <option>NJ</option>
+                            <option>NM</option>
+                            <option>NY</option>
+                            <option>NC</option>
+                            <option>ND</option>
+                            <option>OH</option>
+                            <option>OK</option>
+                            <option>OR</option>
+                            <option>PA</option>
+                            <option>RI</option>
+                            <option>SC</option>
+                            <option>SD</option>
+                            <option>TN</option>
+                            <option>TX</option>
+                            <option>UT</option>
+                            <option>VT</option>
+                            <option>VA</option>
+                            <option>WA</option>
+                            <option>WV</option>
+                            <option>WI</option>
+                            <option>WY</option>
+                        </select>
+                    </div>
+
+                    <div class="field">
+                        <label for="address">Address</label>
+                        <input id="address" name="address" placeholder="123 Fake Street" />
+                    </div>
+
+                    <div class="field">
+                        <label for="dob">Date of Birth</label>
+                        <input id="dob" name="dob" type="date" />
+                        <span class="small">Split into dob_mm / dob_dd / dob_yyyy automatically.</span>
+                    </div>
+
+                    <div class="field">
+                        <label for="gender">Gender</label>
+                        <select id="gender" name="gender">
+                            <option value="">— Select —</option>
+                            <option value="M">Male</option>
+                            <option value="F">Female</option>
+                        </select>
+                    </div>
+
+                    <div class="field">
+                        <label for="marital_status">Marital Status</label>
+                        <input id="marital_status" name="marital_status" placeholder="Single / Married" />
+                    </div>
+
+                    <div class="field">
+                        <label for="employment_status">Employment Status</label>
+                        <input id="employment_status" name="employment_status" placeholder="Employed" />
+                    </div>
+
+                    <div class="field">
+                        <label for="spoken_language">Preferred Language</label>
+                        <input id="spoken_language" name="spoken_language" placeholder="English" />
+                    </div>
+
+                    <div class="field">
+                        <label for="best_time_to_contact">Best Time to Contact</label>
+                        <input id="best_time_to_contact" name="best_time_to_contact" placeholder="Afternoon" />
+                    </div>
+
+                    <div class="field">
+                        <label for="payment_method_available">Payment Method Available?</label>
+                        <select id="payment_method_available" name="payment_method_available">
+                            <option value="">— Select —</option>
+                            <option value="true">Yes</option>
+                            <option value="false">No</option>
+                        </select>
+                    </div>
+
+                    <div class="field">
+                        <label for="monthly_affordable_payment_amount">Monthly Affordable Payment ($)</label>
+                        <input id="monthly_affordable_payment_amount" name="monthly_affordable_payment_amount"
+                            type="number" placeholder="37" />
+                    </div>
+
+                    <div class="field full">
+                        <label for="trusted_form_cert_url">Trusted Form Certificate URL <span
+                                class="req">*</span></label>
+                        <input id="trusted_form_cert_url" name="trusted_form_cert_url" type="url"
+                            placeholder="https://cert.trustedform.com/..." required />
+                    </div>
+
+                    <div class="field full">
+                        <label for="jornaya_leadid">Jornaya Lead ID (from Website)</label>
+                        <input id="jornaya_leadid" name="jornaya_leadid" placeholder="Optional" />
+                    </div>
+
+                    <div class="field full">
+                        <label for="tcpa_optin_consent_language">TCPA Consent Language</label>
+                        <textarea id="tcpa_optin_consent_language" name="tcpa_optin_consent_language"
+                            placeholder="Text shown to the lead at the time they opted in"></textarea>
+                    </div>
+
+                    <div class="field full checkbox-row">
+                        <input id="tcpa_opt_in" name="tcpa_opt_in" type="checkbox" />
+                        <label for="tcpa_opt_in" style="margin:0;">Lead checked the TCPA opt-in box on the form</label>
+                    </div>
+
+                    <div class="field">
+                        <label for="sub_id">Sub ID (Affiliate ID)</label>
+                        <input id="sub_id" name="sub_id" placeholder="Optional" />
+                    </div>
+
+                    <div class="field">
+                        <label for="traffic_source_lead_id">Your Internal Lead ID</label>
+                        <input id="traffic_source_lead_id" name="traffic_source_lead_id" placeholder="Optional" />
+                    </div>
+
+                </div>
+            </fieldset>
+
+            <button id="submitBtn" type="submit">Submit Lead to TrackDrive</button>
+            <div id="status" class="status" aria-live="polite"></div>
+        </form>
+    </div>
+
+    <script>
+        const form = document.getElementById("leadForm");
+        const statusEl = document.getElementById("status");
+        const submitBtn = document.getElementById("submitBtn");
+
+        function setStatus(message, type) {
+            statusEl.textContent = message;
+            statusEl.className = `status ${type}`;
+        }
+
+        function digitsOnly(value) {
+            return (value || "").toString().replace(/\D/g, "");
+        }
+
+        function validPhone(phone) {
+            const d = digitsOnly(phone);
+            return d.length === 10 || d.length === 11;
+        }
+
+        form.addEventListener("submit", async (event) => {
+            event.preventDefault();
+            statusEl.className = "status";
+
+            const data = new FormData(form);
+            const get = (name) => (data.get(name) || "").toString().trim();
+
+            // ── Client-side validation ─────────────────────────────────────
+            if (!get("first_name")) { setStatus("First Name is required.", "error"); return; }
+            if (!get("last_name")) { setStatus("Last Name is required.", "error"); return; }
+            if (!validPhone(get("caller_id"))) { setStatus("Caller Phone Number must be 10–11 digits (numbers only).", "error"); return; }
+            if (!get("email")) { setStatus("Email Address is required.", "error"); return; }
+            if (!get("zip")) { setStatus("Zip Code is required.", "error"); return; }
+            if (!get("state")) { setStatus("State is required.", "error"); return; }
+            if (!get("trusted_form_cert_url")) { setStatus("Trusted Form Certificate URL is required.", "error"); return; }
+
+            // ── Split DOB ────────────────────────────────────────────────
+            let dob_mm = "", dob_dd = "", dob_yyyy = "";
+            const dobRaw = get("dob");
+            if (dobRaw) {
+                const [y, m, d] = dobRaw.split("-");
+                dob_yyyy = y; dob_mm = m; dob_dd = d;
+            }
+
+            // ── Build payload ──────────────────────────────────────────────
+            const payload = {
+                first_name: get("first_name"),
+                last_name: get("last_name"),
+                caller_id: digitsOnly(get("caller_id")),
+                alternate_phone: digitsOnly(get("alternate_phone")),
+                email: get("email"),
+                zip: get("zip"),
+                city: get("city"),
+                state: get("state"),
+                address: get("address"),
+                dob_mm, dob_dd, dob_yyyy,
+                gender: get("gender"),
+                marital_status: get("marital_status"),
+                employment_status: get("employment_status"),
+                spoken_language: get("spoken_language"),
+                best_time_to_contact: get("best_time_to_contact"),
+                payment_method_available: get("payment_method_available"),
+                monthly_affordable_payment_amount: get("monthly_affordable_payment_amount"),
+                trusted_form_cert_url: get("trusted_form_cert_url"),
+                jornaya_leadid: get("jornaya_leadid"),
+                tcpa_optin_consent_language: get("tcpa_optin_consent_language"),
+                tcpa_opt_in: data.get("tcpa_opt_in") ? "true" : "false",
+                sub_id: get("sub_id"),
+                traffic_source_lead_id: get("traffic_source_lead_id"),
+                source_url: window.location.href,
+                useragent: navigator.userAgent,
+            };
+
+            submitBtn.disabled = true;
+            submitBtn.textContent = "Pinging TrackDrive…";
+
+            try {
+                const res = await fetch("/api/send-trackdrive-lead", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify(payload),
+                });
+
+                const body = await res.json().catch(() => ({}));
+
+                if (!res.ok) {
+                    throw new Error(body.error || `Request failed (HTTP ${res.status})`);
+                }
+
+                if (body.pingAccepted === false) {
+                    setStatus(
+                        `No buyer available right now.\nPing status: ${body.pingStatus || "n/a"}`,
+                        "info"
+                    );
+                } else {
+                    setStatus(
+                        `Lead accepted.\nForwarding number: ${body.forwardingNumber || "n/a"}\nA debug email with the full ping/post response has been sent.`,
+                        "ok"
+                    );
+                    form.reset();
+                }
+            } catch (error) {
+                setStatus(`Submission failed: ${error.message}`, "error");
+            } finally {
+                submitBtn.disabled = false;
+                submitBtn.textContent = "Submit Lead to TrackDrive";
+            }
+        });
+    </script>
+
+</body>
+
+</html>
