@@ -173,7 +173,12 @@ export default async function handler(req, res) {
   try {
     const data = typeof req.body === "string" ? JSON.parse(req.body) : req.body;
 
-    const callerId = data?.caller_id ? digitsOnly(data.caller_id) : "";
+    let callerId = data?.caller_id ? digitsOnly(data.caller_id) : "";
+    if (callerId.length === 10) {
+      callerId = `+1${callerId}`;
+    } else if (callerId.length === 11 && callerId.startsWith("1")) {
+      callerId = `+${callerId}`;
+    }
     const alternatePhone = data?.alternate_phone
       ? digitsOnly(data.alternate_phone)
       : "";
@@ -185,7 +190,8 @@ export default async function handler(req, res) {
     // ping response) are actually required. Everything else is optional;
     // we only validate FORMAT for fields the caller chose to include.
     const errors = {};
-    if (callerId && !(callerId.length === 10 || callerId.length === 11))
+    const callerDigits = digitsOnly(callerId);
+    if (callerDigits && !(callerDigits.length === 10 || callerDigits.length === 11))
       errors.caller_id = "must be 10–11 digits if provided";
     if (
       alternatePhone &&
