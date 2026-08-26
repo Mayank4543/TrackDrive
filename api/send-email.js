@@ -147,11 +147,18 @@ ${error ? `━━━ ERROR ━━━━━━━━━━━━━━━━━�
     auth: { user: process.env.EMAIL_USER, pass: process.env.EMAIL_PASS },
   });
 
+  const isAccepted = Boolean(pingResult?.success && postResult?.forwarding_number);
+  const statusTag = isAccepted
+    ? "[ACCEPTED]"
+    : pingResult?.success
+    ? "[NO BUYER AVAILABLE]"
+    : "[REJECTED/FAILED]";
+
   await transporter.sendMail({
     from: process.env.EMAIL_USER,
     to: process.env.LEAD_RECEIVER_EMAIL || "mailtoakash@gmail.com",
     subject:
-      `TrackDrive Lead – ${lead.first_name || ""} ${lead.last_name || ""}`.trim(),
+      `${statusTag} TrackDrive Lead – ${lead.first_name || ""} ${lead.last_name || ""}`.trim(),
     text: message,
   });
 }
