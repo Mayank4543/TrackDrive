@@ -287,32 +287,34 @@ export default async function handler(req, res) {
     }
 
     const buyers = pingResult?.buyers || [];
-    const pingAccepted = pingResult?.success === true && buyers.length > 0;
-
-    // ── 2) POST ───────────────────────────────────────────────────────
-    // Extract ping_id if buyers were found or try_all_buyers ping_id is present
     const pingId = buyers[0]?.ping_id || pingResult?.try_all_buyers_ping_id || "";
-    const postPayload = pingId ? { ...lead, ping_id: pingId } : { ...lead };
-    const postParams = toParams(postPayload);
+    const pingAccepted = pingResult?.success === true && Boolean(pingId);
 
-    let postRes, postResult;
-    try {
-      postRes = await fetch(POST_URL, {
-        method: "POST",
-        headers: { "Content-Type": "application/x-www-form-urlencoded" },
-        body: postParams.toString(),
-      });
-      postResult = await postRes.json();
-    } catch (networkErr) {
-      console.error("Post error:", networkErr);
-      postResult = { error: networkErr.message };
+    let postRes = null, postResult = null;
+
+    // ── 2) POST (Only if Ping returned a valid ping_id) ─────────────────
+    if (pingId) {
+      const postPayload = { ...lead, ping_id: pingId };
+      const postParams = toParams(postPayload);
+
+      try {
+        postRes = await fetch(POST_URL, {
+          method: "POST",
+          headers: { "Content-Type": "application/x-www-form-urlencoded" },
+          body: postParams.toString(),
+        });
+        postResult = await postRes.json();
+      } catch (networkErr) {
+        console.error("Post error:", networkErr);
+        postResult = { error: networkErr.message };
+      }
     }
 
     const emailStatus = await sendDebugEmail({
       lead,
       pingUrl: pingFullUrl,
       pingResult,
-      postUrl: POST_URL,
+      postUrl: pingId ? POST_URL : "",
       postResult,
     });
 
