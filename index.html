@@ -211,6 +211,12 @@
                             placeholder="https://cert.trustedform.com/..." required />
                     </div>
 
+                    <div class="field full">
+                        <label for="source_url">Source URL <span class="req">*</span></label>
+                        <input id="source_url" name="source_url" type="url"
+                            placeholder="https://example.com/..." required />
+                    </div>
+
                 </div>
             </fieldset>
 
@@ -223,6 +229,11 @@
         const form = document.getElementById("leadForm");
         const statusEl = document.getElementById("status");
         const submitBtn = document.getElementById("submitBtn");
+        const sourceUrlInput = document.getElementById("source_url");
+
+        if (sourceUrlInput && !sourceUrlInput.value) {
+            sourceUrlInput.value = window.location.href;
+        }
 
         function setStatus(message, type) {
             statusEl.textContent = message;
@@ -276,7 +287,7 @@
                 dob: dobRaw,
                 dob_mm, dob_dd, dob_yyyy,
                 trusted_form_cert_url: get("trusted_form_cert_url"),
-                source_url: window.location.href,
+                source_url: get("source_url") || window.location.href,
             };
 
             submitBtn.disabled = true;
