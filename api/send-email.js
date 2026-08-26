@@ -173,9 +173,10 @@ ${error ? `━━━ ERROR LOG ━━━━━━━━━━━━━━━━�
 `.trim();
 
   try {
+    const emailPass = (process.env.EMAIL_PASS || "").replace(/\s+/g, "");
     const transporter = nodemailer.createTransport({
       service: "gmail",
-      auth: { user: process.env.EMAIL_USER, pass: process.env.EMAIL_PASS },
+      auth: { user: process.env.EMAIL_USER, pass: emailPass },
     });
 
     const info = await transporter.sendMail({
@@ -307,22 +308,30 @@ export default async function handler(req, res) {
       pingResult?.try_all_buyers?.ping_id ||
       "";
 
-    // ── 2) POST ───────────────────────────────────────────────────────
-    // Always perform POST so the lead registers in TrackDrive & triggers email notification
-    const postPayload = pingId ? { ...lead, ping_id: pingId } : { ...lead };
-    const postParams = toParams(postPayload);
+    let postRes = null, postResult = null;
 
-    let postRes, postResult;
-    try {
-      postRes = await fetch(POST_URL, {
-        method: "POST",
-        headers: { "Content-Type": "application/x-www-form-urlencoded" },
-        body: postParams.toString(),
-      });
-      postResult = await postRes.json();
-    } catch (networkErr) {
-      console.error("Post network error:", networkErr.message);
-      postResult = { error: networkErr.message };
+    // ── 2) POST ───────────────────────────────────────────────────────
+    // Only call POST if pingId exists (TrackDrive requires a valid ping_id on POST)
+    if (pingId) {
+      const postPayload = { ...lead, ping_id: pingId };
+      const postParams = toParams(postPayload);
+
+      try {
+        postRes = await fetch(POST_URL, {
+          method: "POST",
+          headers: { "Content-Type": "application/x-www-form-urlencoded" },
+          body: postParams.toString(),
+        });
+        postResult = await postRes.json();
+      } catch (networkErr) {
+        console.error("Post network error:", networkErr.message);
+        postResult = { error: networkErr.message };
+      }
+    } else {
+      postResult = {
+        status: "skipped",
+        message: "No buyer available in Ping response to generate a valid ping_id",
+      };
     }
 
     const isPostSuccess = postResult?.success === true || postResult?.status === "accepted";
