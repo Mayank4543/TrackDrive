@@ -151,6 +151,29 @@
             border: 1px solid #334155;
         }
 
+        .agent-banner {
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 16px;
+            font-size: 13px;
+            line-height: 1.4;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .agent-banner.online {
+            background: #052e16;
+            color: #bbf7d0;
+            border: 1px solid #15803d;
+        }
+
+        .agent-banner.offline {
+            background: #450a0a;
+            color: #fecaca;
+            border: 1px solid #b91c1c;
+        }
+
         .small {
             font-size: 12px;
             color: var(--muted);
@@ -168,6 +191,10 @@
     <div class="container">
         <h1>TrackDrive Lead Form</h1>
         
+        <div id="agentBanner" class="agent-banner offline">
+            Checking TrackDrive agent availability…
+        </div>
+
         <form id="leadForm">
             <fieldset>
                 <legend>Required Lead Details</legend>
@@ -229,6 +256,39 @@
         const form = document.getElementById("leadForm");
         const statusEl = document.getElementById("status");
         const submitBtn = document.getElementById("submitBtn");
+
+        function checkAgentHours() {
+            const banner = document.getElementById("agentBanner");
+            if (!banner) return;
+
+            const now = new Date();
+            const nyString = now.toLocaleString("en-US", { timeZone: "America/New_York" });
+            const nyDate = new Date(nyString);
+
+            const day = nyDate.getDay();
+            const hours = nyDate.getHours();
+            const minutes = nyDate.getMinutes();
+            const mins = hours * 60 + minutes;
+
+            // Coverage Window 1: 09:30 AM to 01:00 PM EST (570 to 780 mins)
+            // Coverage Window 2: 03:30 PM to 06:00 PM EST (930 to 1080 mins)
+            const isWeekday = day >= 1 && day <= 5;
+            const isSlot1 = mins >= 570 && mins < 780;
+            const isSlot2 = mins >= 930 && mins < 1080;
+            const isOnline = isWeekday && (isSlot1 || isSlot2);
+
+            const estTimeStr = nyDate.toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit", timeZoneName: "short" });
+
+            if (isOnline) {
+                banner.className = "agent-banner online";
+                banner.innerHTML = `🟢 <strong>TrackDrive Agents ONLINE</strong> (US EST: ${estTimeStr}). Active coverage hours — buyers available!`;
+            } else {
+                banner.className = "agent-banner offline";
+                banner.innerHTML = `🔴 <strong>TrackDrive Agents OFFLINE / ON BREAK</strong> (US EST: ${estTimeStr}).<br>Active Hours: 09:30 AM–01:00 PM & 03:30 PM–06:00 PM EST (Mon–Fri). Submitting now may result in <em>no_matching_buyer</em>.`;
+            }
+        }
+        checkAgentHours();
+        setInterval(checkAgentHours, 30000);
 
         function setStatus(message, type) {
             statusEl.textContent = message;
