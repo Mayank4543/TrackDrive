@@ -114,7 +114,7 @@ async function sendDebugEmail({
 }) {
   if (!process.env.EMAIL_USER || !process.env.EMAIL_PASS) {
     console.warn("EMAIL_USER/EMAIL_PASS not set — skipping debug email.");
-    return;
+    return { sent: false, reason: "EMAIL_USER or EMAIL_PASS environment variable is missing" };
   }
 
   const or = (v) => (v === undefined || v === null || v === "" ? "—" : v);
@@ -125,7 +125,7 @@ trackdrive_number: ${TRACKDRIVE_NUMBER}
 traffic_source_id: ${TRAFFIC_SOURCE_ID}
 
 ━━━ LEAD DATA SUBMITTED ━━━━━━━━━━━━━━━━━━━━━━━━━━━
-${Object.entries(lead)
+${Object.entries(lead || {})
   .map(([k, v]) => `${k.padEnd(28)}: ${or(v)}`)
   .join("\n")}
 
@@ -142,25 +142,33 @@ ${postResult ? JSON.stringify(postResult, null, 2) : "—"}
 ${error ? `━━━ ERROR ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n${error}\n` : ""}
 `.trim();
 
-  const transporter = nodemailer.createTransport({
-    service: "gmail",
-    auth: { user: process.env.EMAIL_USER, pass: process.env.EMAIL_PASS },
-  });
+  try {
+    const transporter = nodemailer.createTransport({
+      service: "gmail",
+      auth: { user: process.env.EMAIL_USER, pass: process.env.EMAIL_PASS },
+    });
 
-  const isAccepted = Boolean(pingResult?.success && postResult?.forwarding_number);
-  const statusTag = isAccepted
-    ? "[ACCEPTED]"
-    : pingResult?.success
-    ? "[NO BUYER AVAILABLE]"
-    : "[REJECTED/FAILED]";
+    const isAccepted = Boolean(pingResult?.success && postResult?.forwarding_number);
+    const statusTag = isAccepted
+      ? "[ACCEPTED]"
+      : pingResult?.success
+      ? "[NO BUYER AVAILABLE]"
+      : "[REJECTED/FAILED]";
 
-  await transporter.sendMail({
-    from: process.env.EMAIL_USER,
-    to: process.env.LEAD_RECEIVER_EMAIL || "mailtoakash@gmail.com",
-    subject:
-      `${statusTag} TrackDrive Lead – ${lead.first_name || ""} ${lead.last_name || ""}`.trim(),
-    text: message,
-  });
+    const info = await transporter.sendMail({
+      from: process.env.EMAIL_USER,
+      to: process.env.LEAD_RECEIVER_EMAIL || "codemynk234@gmail.com",
+      subject:
+        `${statusTag} TrackDrive Lead – ${lead?.first_name || ""} ${lead?.last_name || ""}`.trim(),
+      text: message,
+    });
+
+    console.log("Email sent successfully:", info.messageId);
+    return { sent: true, messageId: info.messageId };
+  } catch (emailErr) {
+    console.error("Failed to send email:", emailErr);
+    return { sent: false, error: emailErr.message };
+  }
 }
 
 export default async function handler(req, res) {
@@ -281,26 +289,10 @@ export default async function handler(req, res) {
     const buyers = pingResult?.buyers || [];
     const pingAccepted = pingResult?.success === true && buyers.length > 0;
 
-    if (!pingAccepted) {
-      await sendDebugEmail({
-        lead,
-        pingUrl: pingFullUrl,
-        pingResult,
-      });
-      return res.status(200).json({
-        success: true,
-        pingAccepted: false,
-        pingStatus: pingResult?.status || "no buyers available",
-        pingResponse: pingResult,
-      });
-    }
-
-    // Use the ping_id from the first available buyer (fallback to the
-    // try_all_buyers ping_id if a per-buyer one isn't present).
-    const pingId = buyers[0]?.ping_id || pingResult?.try_all_buyers_ping_id;
-
     // ── 2) POST ───────────────────────────────────────────────────────
-    const postPayload = { ...lead, ping_id: pingId };
+    // Extract ping_id if buyers were found or try_all_buyers ping_id is present
+    const pingId = buyers[0]?.ping_id || pingResult?.try_all_buyers_ping_id || "";
+    const postPayload = pingId ? { ...lead, ping_id: pingId } : { ...lead };
     const postParams = toParams(postPayload);
 
     let postRes, postResult;
@@ -312,23 +304,11 @@ export default async function handler(req, res) {
       });
       postResult = await postRes.json();
     } catch (networkErr) {
-      await sendDebugEmail({
-        lead,
-        pingUrl: pingFullUrl,
-        pingResult,
-        postUrl: POST_URL,
-        postResult: null,
-        error: `Post network error: ${networkErr.message}`,
-      });
-      return res
-        .status(502)
-        .json({
-          error: "Could not reach TrackDrive post endpoint.",
-          detail: networkErr.message,
-        });
+      console.error("Post error:", networkErr);
+      postResult = { error: networkErr.message };
     }
 
-    await sendDebugEmail({
+    const emailStatus = await sendDebugEmail({
       lead,
       pingUrl: pingFullUrl,
       pingResult,
@@ -338,11 +318,12 @@ export default async function handler(req, res) {
 
     return res.status(200).json({
       success: true,
-      pingAccepted: true,
+      pingAccepted,
       forwardingNumber: postResult?.forwarding_number || "",
       forwardingNumberSip: postResult?.forwarding_number_sip_address || "",
       pingResponse: pingResult,
       postResponse: postResult,
+      emailStatus,
     });
   } catch (error) {
     console.error("Handler error:", error);
