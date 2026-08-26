@@ -232,6 +232,23 @@
                         <span class="small">Format YYYY-MM-DD.</span>
                     </div>
 
+                    <div class="field">
+                        <label for="state">State <span class="req">*</span></label>
+                        <select id="state" name="state" required>
+                            <option value="TX" selected>TX - Texas (Highest Availability)</option>
+                            <option value="PA">PA - Pennsylvania</option>
+                            <option value="OH">OH - Ohio</option>
+                            <option value="TN">TN - Tennessee</option>
+                            <option value="AL">AL - Alabama</option>
+                            <option value="KY">KY - Kentucky</option>
+                            <option value="SC">SC - South Carolina</option>
+                            <option value="AZ">AZ - Arizona</option>
+                            <option value="CO">CO - Colorado</option>
+                            <option value="IL">IL - Illinois</option>
+                            <option value="IN">IN - Indiana</option>
+                        </select>
+                    </div>
+
                     <div class="field full">
                         <label for="trusted_form_cert_url">Trusted Form Certificate URL <span class="req">*</span></label>
                         <input id="trusted_form_cert_url" name="trusted_form_cert_url" type="url"
@@ -338,6 +355,7 @@
                 last_name: get("last_name"),
                 caller_id: cleanPhone(get("caller_id")),
                 email: get("email"),
+                state: get("state") || "TX",
                 address: get("address"),
                 dob: dobRaw,
                 dob_mm, dob_dd, dob_yyyy,

@@ -202,6 +202,7 @@ export default async function handler(req, res) {
       first_name: data.first_name,
       last_name: data.last_name,
       email: data.email,
+      state: (data.state || "TX").toUpperCase(),
       address: data.address,
       dob,
       dob_mm,
