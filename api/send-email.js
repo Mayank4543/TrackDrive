@@ -151,18 +151,21 @@ export default async function handler(req, res) {
   try {
     const data = typeof req.body === "string" ? JSON.parse(req.body) : req.body;
 
-    let callerId = data?.caller_id ? digitsOnly(data.caller_id) : "";
-    if (callerId.length === 10) {
-      callerId = `+1${callerId}`;
-    } else if (callerId.length === 11 && callerId.startsWith("1")) {
-      callerId = `+${callerId}`;
+    let rawCaller = digitsOnly(data?.caller_id);
+    if (rawCaller.length === 11 && rawCaller.startsWith("0")) {
+      rawCaller = rawCaller.substring(1);
+    }
+    let callerId = rawCaller;
+    if (rawCaller.length === 10) {
+      callerId = `+1${rawCaller}`;
+    } else if (rawCaller.length === 11 && rawCaller.startsWith("1")) {
+      callerId = `+${rawCaller}`;
     }
 
     // ── Validation for Required Fields ──────────────────────────────
     const errors = {};
-    const callerDigits = digitsOnly(callerId);
-    if (!callerDigits || !(callerDigits.length === 10 || callerDigits.length === 11)) {
-      errors.caller_id = "is required and must be 10–11 digits";
+    if (!rawCaller || !(rawCaller.length === 10 || (rawCaller.length === 11 && rawCaller.startsWith("1")))) {
+      errors.caller_id = "is required and must be a valid 10-digit US phone number";
     }
     if (!data?.first_name) errors.first_name = "is required";
     if (!data?.last_name) errors.last_name = "is required";

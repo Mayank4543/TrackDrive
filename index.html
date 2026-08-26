@@ -233,9 +233,17 @@
             return (value || "").toString().replace(/\D/g, "");
         }
 
+        function cleanPhone(phone) {
+            let d = digitsOnly(phone);
+            if (d.length === 11 && d.startsWith("0")) {
+                d = d.substring(1);
+            }
+            return d;
+        }
+
         function validPhone(phone) {
-            const d = digitsOnly(phone);
-            return d.length === 10 || d.length === 11;
+            const d = cleanPhone(phone);
+            return d.length === 10 || (d.length === 11 && d.startsWith("1"));
         }
 
         form.addEventListener("submit", async (event) => {
@@ -246,7 +254,7 @@
             const get = (name) => (data.get(name) || "").toString().trim();
 
             if (!validPhone(get("caller_id"))) {
-                setStatus("Caller Phone Number must be 10–11 digits (numbers only).", "error");
+                setStatus("Caller Phone Number must be a valid 10-digit US phone number (e.g. 7194451111).", "error");
                 return;
             }
 
@@ -262,7 +270,7 @@
             const payload = {
                 first_name: get("first_name"),
                 last_name: get("last_name"),
-                caller_id: digitsOnly(get("caller_id")),
+                caller_id: cleanPhone(get("caller_id")),
                 email: get("email"),
                 address: get("address"),
                 dob: dobRaw,
