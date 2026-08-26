@@ -344,32 +344,6 @@
                             placeholder="https://cert.trustedform.com/..." />
                     </div>
 
-                    <div class="field full">
-                        <label for="jornaya_leadid">Jornaya Lead ID (from Website)</label>
-                        <input id="jornaya_leadid" name="jornaya_leadid" placeholder="Optional" />
-                    </div>
-
-                    <div class="field full">
-                        <label for="tcpa_optin_consent_language">TCPA Consent Language</label>
-                        <textarea id="tcpa_optin_consent_language" name="tcpa_optin_consent_language"
-                            placeholder="Text shown to the lead at the time they opted in"></textarea>
-                    </div>
-
-                    <div class="field full checkbox-row">
-                        <input id="tcpa_opt_in" name="tcpa_opt_in" type="checkbox" />
-                        <label for="tcpa_opt_in" style="margin:0;">Lead checked the TCPA opt-in box on the form</label>
-                    </div>
-
-                    <div class="field">
-                        <label for="sub_id">Sub ID (Affiliate ID)</label>
-                        <input id="sub_id" name="sub_id" placeholder="Optional" />
-                    </div>
-
-                    <div class="field">
-                        <label for="traffic_source_lead_id">Your Internal Lead ID</label>
-                        <input id="traffic_source_lead_id" name="traffic_source_lead_id" placeholder="Optional" />
-                    </div>
-
                 </div>
             </fieldset>
 
@@ -445,11 +419,6 @@
                 payment_method_available: get("payment_method_available"),
                 monthly_affordable_payment_amount: get("monthly_affordable_payment_amount"),
                 trusted_form_cert_url: get("trusted_form_cert_url"),
-                jornaya_leadid: get("jornaya_leadid"),
-                tcpa_optin_consent_language: get("tcpa_optin_consent_language"),
-                tcpa_opt_in: data.get("tcpa_opt_in") ? "true" : "false",
-                sub_id: get("sub_id"),
-                traffic_source_lead_id: get("traffic_source_lead_id"),
                 source_url: window.location.href,
                 useragent: navigator.userAgent,
             };
