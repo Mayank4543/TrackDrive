@@ -11,60 +11,6 @@ const PING_URL =
 const POST_URL =
   "https://infoworx.trackdrive.com/api/v1/inbound_webhooks/post/check_fe_agents";
 
-const ALLOWED_STATES = new Set([
-  "AL",
-  "AK",
-  "AZ",
-  "AR",
-  "CA",
-  "CO",
-  "CT",
-  "DC",
-  "DE",
-  "FL",
-  "GA",
-  "HI",
-  "ID",
-  "IL",
-  "IN",
-  "IA",
-  "KS",
-  "KY",
-  "LA",
-  "ME",
-  "MD",
-  "MA",
-  "MI",
-  "MN",
-  "MS",
-  "MO",
-  "MT",
-  "NE",
-  "NV",
-  "NH",
-  "NJ",
-  "NM",
-  "NY",
-  "NC",
-  "ND",
-  "OH",
-  "OK",
-  "OR",
-  "PA",
-  "RI",
-  "SC",
-  "SD",
-  "TN",
-  "TX",
-  "UT",
-  "VT",
-  "VA",
-  "WA",
-  "WV",
-  "WI",
-  "WY",
-]);
-
 function digitsOnly(value) {
   return (value || "").toString().replace(/\D/g, "");
 }
@@ -211,36 +157,20 @@ export default async function handler(req, res) {
     } else if (callerId.length === 11 && callerId.startsWith("1")) {
       callerId = `+${callerId}`;
     }
-    const alternatePhone = data?.alternate_phone
-      ? digitsOnly(data.alternate_phone)
-      : "";
-    const state = data?.state ? data.state.toUpperCase() : "";
 
-    // ── Validation ────────────────────────────────────────────────────
-    // Nothing is required by TrackDrive itself — only trackdrive_number,
-    // traffic_source_id (both fixed below), and ping_id (added after the
-    // ping response) are actually required. Everything else is optional;
-    // we only validate FORMAT for fields the caller chose to include.
+    // ── Validation for Required Fields ──────────────────────────────
     const errors = {};
     const callerDigits = digitsOnly(callerId);
-    if (callerDigits && !(callerDigits.length === 10 || callerDigits.length === 11))
-      errors.caller_id = "must be 10–11 digits if provided";
-    if (
-      alternatePhone &&
-      !(alternatePhone.length === 10 || alternatePhone.length === 11)
-    )
-      errors.alternate_phone = "must be 10–11 digits if provided";
-    if (state && !ALLOWED_STATES.has(state))
-      errors.state = "must be a valid 2-letter US state if provided";
-    if (data?.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(data.email))
-      errors.email = "must be a valid email if provided";
-
-    if (Object.keys(errors).length) {
-      return res.status(400).json({ status: 4, errors: [errors] });
+    if (!callerDigits || !(callerDigits.length === 10 || callerDigits.length === 11)) {
+      errors.caller_id = "is required and must be 10–11 digits";
     }
-
-    // IP always comes from request headers — never trust user input for this
-    const ipAddress = getRealIp(req);
+    if (!data?.first_name) errors.first_name = "is required";
+    if (!data?.last_name) errors.last_name = "is required";
+    if (!data?.email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(data.email)) {
+      errors.email = "is required and must be a valid email address";
+    }
+    if (!data?.address) errors.address = "is required";
+    if (!data?.trusted_form_cert_url) errors.trusted_form_cert_url = "is required";
 
     // Handle DOB: calculate `dob` (YYYY-MM-DD) if dob_yyyy, dob_mm, dob_dd are available
     let dob = data.dob || "";
@@ -251,6 +181,14 @@ export default async function handler(req, res) {
     if (!dob && dob_yyyy && dob_mm && dob_dd) {
       dob = `${dob_yyyy}-${dob_mm.padStart(2, "0")}-${dob_dd.padStart(2, "0")}`;
     }
+    if (!dob) errors.dob = "is required";
+
+    if (Object.keys(errors).length) {
+      return res.status(400).json({ status: 4, errors: [errors] });
+    }
+
+    // IP always comes from request headers — never trust user input for this
+    const ipAddress = getRealIp(req);
 
     lead = {
       trackdrive_number: TRACKDRIVE_NUMBER,
@@ -259,31 +197,13 @@ export default async function handler(req, res) {
       first_name: data.first_name,
       last_name: data.last_name,
       email: data.email,
-      zip: data.zip,
-      city: data.city || "",
-      state,
-      address: data.address || "",
-      alternate_phone: alternatePhone,
+      address: data.address,
       dob,
       dob_mm,
       dob_dd,
       dob_yyyy,
-      gender: data.gender || "",
-      marital_status: data.marital_status || "",
-      employment_status: data.employment_status || "",
-      spoken_language: data.spoken_language || "",
-      best_time_to_contact: data.best_time_to_contact || "",
-      payment_method_available: data.payment_method_available || "",
-      monthly_affordable_payment_amount:
-        data.monthly_affordable_payment_amount || "",
       trusted_form_cert_url: data.trusted_form_cert_url,
-      jornaya_leadid: data.jornaya_leadid || "",
-      tcpa_opt_in: data.tcpa_opt_in || "false",
-      tcpa_optin_consent_language: data.tcpa_optin_consent_language || "",
-      sub_id: data.sub_id || "",
-      traffic_source_lead_id: data.traffic_source_lead_id || "",
       source_url: data.source_url || "",
-      useragent: data.useragent || "",
       ip_address: ipAddress,
     };
 
@@ -301,7 +221,7 @@ export default async function handler(req, res) {
     }
 
     const buyers = pingResult?.buyers || [];
-    // Extract ping_id or fallback to try_all_buyers or dummy fallback for direct post
+    // Extract ping_id or fallback to try_all_buyers
     const pingId =
       buyers[0]?.ping_id ||
       pingResult?.try_all_buyers_ping_id ||

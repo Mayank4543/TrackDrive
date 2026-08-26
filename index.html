@@ -104,22 +104,6 @@
             background: #0b1220;
         }
 
-        textarea {
-            min-height: 60px;
-            resize: vertical;
-        }
-
-        .checkbox-row {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            flex-direction: row;
-        }
-
-        .checkbox-row input {
-            width: auto;
-        }
-
         button {
             cursor: pointer;
             background: var(--accent);
@@ -186,162 +170,45 @@
         
         <form id="leadForm">
             <fieldset>
-                <legend>Lead Details</legend>
+                <legend>Required Lead Details</legend>
                 <div class="grid">
 
                     <div class="field">
-                        <label for="first_name">First Name</label>
-                        <input id="first_name" name="first_name" placeholder="Jane" />
+                        <label for="first_name">First Name <span class="req">*</span></label>
+                        <input id="first_name" name="first_name" placeholder="Jane" required />
                     </div>
 
                     <div class="field">
-                        <label for="last_name">Last Name</label>
-                        <input id="last_name" name="last_name" placeholder="Doe" />
+                        <label for="last_name">Last Name <span class="req">*</span></label>
+                        <input id="last_name" name="last_name" placeholder="Doe" required />
                     </div>
 
                     <div class="field">
-                        <label for="caller_id">Caller Phone Number</label>
-                        <input id="caller_id" name="caller_id" placeholder="7194451111" />
-                        <span class="small">10–11 digits, if provided. This is the lead's telephone number.</span>
+                        <label for="caller_id">Caller Phone Number <span class="req">*</span></label>
+                        <input id="caller_id" name="caller_id" placeholder="7194451111" required />
+                        <span class="small">10–11 digits. Lead's telephone number.</span>
                     </div>
 
                     <div class="field">
-                        <label for="alternate_phone">Alternate Phone</label>
-                        <input id="alternate_phone" name="alternate_phone" placeholder="7194451112" />
-                    </div>
-
-                    <div class="field">
-                        <label for="email">Email Address</label>
-                        <input id="email" name="email" type="email" placeholder="jane@example.com" />
-                    </div>
-
-                    <div class="field">
-                        <label for="zip">Zip Code</label>
-                        <input id="zip" name="zip" placeholder="80301" />
-                    </div>
-
-                    <div class="field">
-                        <label for="city">City</label>
-                        <input id="city" name="city" placeholder="Boulder" />
-                    </div>
-
-                    <div class="field">
-                        <label for="state">State</label>
-                        <select id="state" name="state">
-                            <option value="">— Select State —</option>
-                            <option>AL</option>
-                            <option>AK</option>
-                            <option>AZ</option>
-                            <option>AR</option>
-                            <option>CA</option>
-                            <option>CO</option>
-                            <option>CT</option>
-                            <option>DC</option>
-                            <option>DE</option>
-                            <option>FL</option>
-                            <option>GA</option>
-                            <option>HI</option>
-                            <option>ID</option>
-                            <option>IL</option>
-                            <option>IN</option>
-                            <option>IA</option>
-                            <option>KS</option>
-                            <option>KY</option>
-                            <option>LA</option>
-                            <option>ME</option>
-                            <option>MD</option>
-                            <option>MA</option>
-                            <option>MI</option>
-                            <option>MN</option>
-                            <option>MS</option>
-                            <option>MO</option>
-                            <option>MT</option>
-                            <option>NE</option>
-                            <option>NV</option>
-                            <option>NH</option>
-                            <option>NJ</option>
-                            <option>NM</option>
-                            <option>NY</option>
-                            <option>NC</option>
-                            <option>ND</option>
-                            <option>OH</option>
-                            <option>OK</option>
-                            <option>OR</option>
-                            <option>PA</option>
-                            <option>RI</option>
-                            <option>SC</option>
-                            <option>SD</option>
-                            <option>TN</option>
-                            <option>TX</option>
-                            <option>UT</option>
-                            <option>VT</option>
-                            <option>VA</option>
-                            <option>WA</option>
-                            <option>WV</option>
-                            <option>WI</option>
-                            <option>WY</option>
-                        </select>
-                    </div>
-
-                    <div class="field">
-                        <label for="address">Address</label>
-                        <input id="address" name="address" placeholder="123 Fake Street" />
-                    </div>
-
-                    <div class="field">
-                        <label for="dob">Date of Birth</label>
-                        <input id="dob" name="dob" type="date" />
-                        <span class="small">Split into dob_mm / dob_dd / dob_yyyy automatically.</span>
-                    </div>
-
-                    <div class="field">
-                        <label for="gender">Gender</label>
-                        <select id="gender" name="gender">
-                            <option value="">— Select —</option>
-                            <option value="M">Male</option>
-                            <option value="F">Female</option>
-                        </select>
-                    </div>
-
-                    <div class="field">
-                        <label for="marital_status">Marital Status</label>
-                        <input id="marital_status" name="marital_status" placeholder="Single / Married" />
-                    </div>
-
-                    <div class="field">
-                        <label for="employment_status">Employment Status</label>
-                        <input id="employment_status" name="employment_status" placeholder="Employed" />
-                    </div>
-
-                    <div class="field">
-                        <label for="spoken_language">Preferred Language</label>
-                        <input id="spoken_language" name="spoken_language" placeholder="English" />
-                    </div>
-
-                    <div class="field">
-                        <label for="best_time_to_contact">Best Time to Contact</label>
-                        <input id="best_time_to_contact" name="best_time_to_contact" placeholder="Afternoon" />
-                    </div>
-
-                    <div class="field">
-                        <label for="payment_method_available">Payment Method Available?</label>
-                        <select id="payment_method_available" name="payment_method_available">
-                            <option value="">— Select —</option>
-                            <option value="true">Yes</option>
-                            <option value="false">No</option>
-                        </select>
-                    </div>
-
-                    <div class="field">
-                        <label for="monthly_affordable_payment_amount">Monthly Affordable Payment ($)</label>
-                        <input id="monthly_affordable_payment_amount" name="monthly_affordable_payment_amount"
-                            type="number" placeholder="37" />
+                        <label for="email">Email Address <span class="req">*</span></label>
+                        <input id="email" name="email" type="email" placeholder="jane@example.com" required />
                     </div>
 
                     <div class="field full">
-                        <label for="trusted_form_cert_url">Trusted Form Certificate URL</label>
+                        <label for="address">Address <span class="req">*</span></label>
+                        <input id="address" name="address" placeholder="123 Fake Street" required />
+                    </div>
+
+                    <div class="field">
+                        <label for="dob">Date of Birth <span class="req">*</span></label>
+                        <input id="dob" name="dob" type="date" required />
+                        <span class="small">Format YYYY-MM-DD.</span>
+                    </div>
+
+                    <div class="field full">
+                        <label for="trusted_form_cert_url">Trusted Form Certificate URL <span class="req">*</span></label>
                         <input id="trusted_form_cert_url" name="trusted_form_cert_url" type="url"
-                            placeholder="https://cert.trustedform.com/..." />
+                            placeholder="https://cert.trustedform.com/..." required />
                     </div>
 
                 </div>
@@ -378,12 +245,8 @@
             const data = new FormData(form);
             const get = (name) => (data.get(name) || "").toString().trim();
 
-            if (get("caller_id") && !validPhone(get("caller_id"))) {
+            if (!validPhone(get("caller_id"))) {
                 setStatus("Caller Phone Number must be 10–11 digits (numbers only).", "error");
-                return;
-            }
-            if (get("alternate_phone") && !validPhone(get("alternate_phone"))) {
-                setStatus("Alternate Phone must be 10–11 digits (numbers only).", "error");
                 return;
             }
 
@@ -395,29 +258,17 @@
                 dob_yyyy = y; dob_mm = m; dob_dd = d;
             }
 
-            // ── Build payload ──────────────────────────────────────────────
+            // ── Build payload with required fields ───────────────────────
             const payload = {
                 first_name: get("first_name"),
                 last_name: get("last_name"),
                 caller_id: digitsOnly(get("caller_id")),
-                alternate_phone: digitsOnly(get("alternate_phone")),
                 email: get("email"),
-                zip: get("zip"),
-                city: get("city"),
-                state: get("state"),
                 address: get("address"),
                 dob: dobRaw,
                 dob_mm, dob_dd, dob_yyyy,
-                gender: get("gender"),
-                marital_status: get("marital_status"),
-                employment_status: get("employment_status"),
-                spoken_language: get("spoken_language"),
-                best_time_to_contact: get("best_time_to_contact"),
-                payment_method_available: get("payment_method_available"),
-                monthly_affordable_payment_amount: get("monthly_affordable_payment_amount"),
                 trusted_form_cert_url: get("trusted_form_cert_url"),
                 source_url: window.location.href,
-                useragent: navigator.userAgent,
             };
 
             submitBtn.disabled = true;
