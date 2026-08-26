@@ -129,25 +129,25 @@ async function sendDebugEmail({
 
   if (postSuccess) {
     statusTag = "[LEAD ACCEPTED]";
-    leadStatusBanner = `✅ LEAD ACCEPTED BY TRACKDRIVE
+    leadStatusBanner = ` LEAD ACCEPTED BY TRACKDRIVE
 Forwarding Number : ${postResult?.forwarding_number || "Accepted"}
 SIP Address       : ${postResult?.forwarding_number_sip_address || "—"}`;
   } else if (pingSuccess) {
     statusTag = "[PING ACCEPTED - POST PENDING]";
-    leadStatusBanner = `⚠️ PING ACCEPTED (BUYER FOUND), BUT POST REJECTED
+    leadStatusBanner = ` PING ACCEPTED (BUYER FOUND), BUT POST REJECTED
 Post Error / Response: ${JSON.stringify(postResult?.errors || postResult || "Failed")}`;
   } else {
     statusTag = "[LEAD REJECTED - NO BUYER]";
-    leadStatusBanner = `❌ LEAD REJECTED BY TRACKDRIVE
+    leadStatusBanner = ` LEAD REJECTED BY TRACKDRIVE
 Reason / Ping Status : ${pingResult?.status || pingResult?.errors?.[0] || "No buyers matched filter criteria"}`;
   }
 
   const or = (v) => (v === undefined || v === null || v === "" ? "—" : v);
 
   const message = `
-==================================================
+
 TRACKDRIVE LEAD STATUS: ${statusTag}
-==================================================
+
 ${leadStatusBanner}
 
 New TrackDrive Lead — InfoWorx check_fe_agents
