@@ -378,9 +378,6 @@
             const data = new FormData(form);
             const get = (name) => (data.get(name) || "").toString().trim();
 
-            // ── Client-side validation ─────────────────────────────────────
-            // Nothing is required by TrackDrive itself — only validate format
-            // for fields the user did choose to fill in.
             if (get("caller_id") && !validPhone(get("caller_id"))) {
                 setStatus("Caller Phone Number must be 10–11 digits (numbers only).", "error");
                 return;
