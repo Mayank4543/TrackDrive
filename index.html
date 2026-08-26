@@ -277,7 +277,7 @@
             const isSlot2 = mins >= 930 && mins < 1080;
             const isOnline = isWeekday && (isSlot1 || isSlot2);
 
-            const estTimeStr = nyDate.toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit", timeZoneName: "short" });
+            const estTimeStr = nyDate.toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit" }) + " EST";
 
             if (isOnline) {
                 banner.className = "agent-banner online";
